@@ -30,8 +30,12 @@ logger = logging.getLogger("ultimate-v5-bot")
 TELEGRAM_BOT_TOKEN = "8872959175:AAHuNvRb629xV9kGVWIKBXOIMsEhwfKVhDY"     # Điền Telegram Bot Token của bạn
 TELEGRAM_CHAT_ID = "7312073144"         # Điền Chat ID Telegram của bạn
 
-# Danh sách các đồng coin quét song song (BTC, ETH, SOL)
-SYMBOLS = ["BTCUSD", "ETHUSD", "SOLUSD"]
+# Danh sách các đồng coin quét song song (tăng lên 12 đồng coin top)
+SYMBOLS = [
+    "BTCUSD", "ETHUSD", "SOLUSD", "BNBUSD", "XRPUSD", 
+    "ADAUSD", "DOGEUSD", "LINKUSD", "LTCUSD", "NEARUSD", 
+    "AVAXUSD", "DOTUSD"
+]
 INTERVAL = "15m"                           # Khung thời gian quét
 STATE_FILE = "positions_state.json"        # Tệp lưu trữ trạng thái vị thế JSON
 # ==========================================================
