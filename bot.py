@@ -30,12 +30,8 @@ logger = logging.getLogger("ultimate-v5-bot")
 TELEGRAM_BOT_TOKEN = "8872959175:AAHuNvRb629xV9kGVWIKBXOIMsEhwfKVhDY"     # Điền Telegram Bot Token của bạn
 TELEGRAM_CHAT_ID = "7312073144"         # Điền Chat ID Telegram của bạn
 
-# Danh sách các đồng coin quét song song (tăng lên 12 đồng coin top)
-SYMBOLS = [
-    "BTCUSD", "ETHUSD", "SOLUSD", "BNBUSD", "XRPUSD", 
-    "ADAUSD", "DOGEUSD", "LINKUSD", "LTCUSD", "NEARUSD", 
-    "AVAXUSD", "DOTUSD"
-]
+# Danh sách các đồng coin quét song song (BTC, ETH, SOL)
+SYMBOLS = ["BTCUSD", "ETHUSD", "SOLUSD"]
 INTERVAL = "15m"                           # Khung thời gian quét
 STATE_FILE = "positions_state.json"        # Tệp lưu trữ trạng thái vị thế JSON
 # ==========================================================
@@ -257,10 +253,19 @@ def poll_telegram_updates():
 # Helper to map common trading symbols to Yahoo Finance format
 def map_symbol_to_yahoo(sym: str) -> str:
     s = sym.upper().strip()
-    if s == "BTCUSD" or s == "BTCUSDT": return "BTC-USD"
-    if s == "ETHUSD" or s == "ETHUSDT": return "ETH-USD"
-    if s == "SOLUSD" or s == "SOLUSDT": return "SOL-USD"
-    if len(s) == 6 and s.isalpha(): return f"{s}=X"
+    if s.endswith("USDT"):
+        base = s[:-4]
+        return f"{base}-USD"
+    if s.endswith("USD"):
+        base = s[:-3]
+        # Ngoại lệ cho các cặp Forex truyền thống nếu có
+        forex_bases = ["EUR", "GBP", "AUD", "NZD", "USD"]
+        if base in forex_bases and len(s) == 6:
+            return f"{s}=X"
+        return f"{base}-USD"
+        
+    if len(s) == 6 and s.isalpha(): 
+        return f"{s}=X"
     return s
 
 def fetch_candles(sym: str, interval: str) -> list:
