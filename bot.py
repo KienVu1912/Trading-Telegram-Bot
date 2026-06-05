@@ -448,8 +448,18 @@ def check_signals_for_symbol(sym: str):
     chop = calculate_chop(candles, CHOP_LEN)
     atr = calculate_atr(candles, ATR_LEN)
     
-    # idx = -2 đại diện cho cây nến vừa đóng cửa hoàn chỉnh (Lọc nhiễu báo ảo)
-    idx = len(candles) - 2
+    # Xác định nến đóng hoàn chỉnh gần nhất dựa trên thời gian thực
+    # (Tránh lỗi Yahoo Finance trễ, lúc ẩn lúc hiện nến chạy trực tiếp ở cuối danh sách)
+    now_ts = time.time()
+    last_candle = candles[-1]
+    
+    # Một nến 15m dài 900 giây. Nếu thời gian hiện tại đã vượt qua thời gian bắt đầu nến cuối + 900 giây,
+    # nghĩa là nến cuối cùng đã đóng cửa hoàn chỉnh.
+    if last_candle["time"] + 900 <= now_ts:
+        idx = len(candles) - 1  # Nến cuối cùng trong danh sách đã đóng cửa
+    else:
+        idx = len(candles) - 2  # Nến cuối cùng vẫn đang chạy live, lấy nến kế cuối làm nến đã đóng
+        
     c = candles[idx]
     c_live = candles[-1]        # Nến chạy trực tiếp để kiểm tra SL/TP tức thời
     
