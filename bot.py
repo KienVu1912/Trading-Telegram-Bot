@@ -277,40 +277,47 @@ def fetch_candles(sym: str, interval: str) -> list:
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
     
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=8) as response:
-            data = json.loads(response.read().decode())
-            result = data.get("chart", {}).get("result", [])
-            if not result:
+    retries = 3
+    for attempt in range(retries):
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=8) as response:
+                data = json.loads(response.read().decode())
+                result = data.get("chart", {}).get("result", [])
+                if not result:
+                    return []
+                
+                chart_data = result[0]
+                timestamps = chart_data.get("timestamp", [])
+                indicators = chart_data.get("indicators", {}).get("quote", [{}])[0]
+                
+                opens = indicators.get("open", [])
+                highs = indicators.get("high", [])
+                lows = indicators.get("low", [])
+                closes = indicators.get("close", [])
+                volumes = indicators.get("volume", [])
+                
+                candles = []
+                for i in range(len(timestamps)):
+                    if opens[i] is not None and closes[i] is not None and highs[i] is not None and lows[i] is not None:
+                        v_val = volumes[i] if (volumes and i < len(volumes) and volumes[i] is not None) else 0
+                        candles.append({
+                            "time": timestamps[i],
+                            "open": opens[i],
+                            "high": highs[i],
+                            "low": lows[i],
+                            "close": closes[i],
+                            "volume": int(v_val)
+                        })
+                return candles
+        except Exception as e:
+            if attempt < retries - 1:
+                logger.warning(f"⚠️ Thử lại lần {attempt + 2} tải dữ liệu {sym} do gặp lỗi tạm thời: {e}")
+                time.sleep(1)
+            else:
+                logger.error(f"Lỗi tải dữ liệu nến cho {sym} sau {retries} lần thử: {e}")
                 return []
-            
-            chart_data = result[0]
-            timestamps = chart_data.get("timestamp", [])
-            indicators = chart_data.get("indicators", {}).get("quote", [{}])[0]
-            
-            opens = indicators.get("open", [])
-            highs = indicators.get("high", [])
-            lows = indicators.get("low", [])
-            closes = indicators.get("close", [])
-            volumes = indicators.get("volume", [])
-            
-            candles = []
-            for i in range(len(timestamps)):
-                if opens[i] is not None and closes[i] is not None and highs[i] is not None and lows[i] is not None:
-                    v_val = volumes[i] if (volumes and i < len(volumes) and volumes[i] is not None) else 0
-                    candles.append({
-                        "time": timestamps[i],
-                        "open": opens[i],
-                        "high": highs[i],
-                        "low": lows[i],
-                        "close": closes[i],
-                        "volume": int(v_val)
-                    })
-            return candles
-    except Exception as e:
-        logger.error(f"Lỗi tải dữ liệu nến cho {sym}: {e}")
-        return []
+    return []
 
 # Mathematical calculations for EMA
 def calculate_ema(prices: list, length: int) -> list:
