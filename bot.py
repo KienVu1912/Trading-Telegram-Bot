@@ -58,7 +58,8 @@ for sym in SYMBOLS:
         "is_partial_closed": False,
         "is_sl_moved_to_be": False,
         "pending_timestamp": 0.0,
-        "pending_msg_id": None
+        "pending_msg_id": None,
+        "last_signal_time": 0
     }
 
 def save_state():
@@ -80,6 +81,9 @@ def load_state():
                 for sym in SYMBOLS:
                     if sym in loaded:
                         positions[sym] = loaded[sym]
+                        # Đảm bảo trường mới tồn tại để tránh lỗi KeyError
+                        if "last_signal_time" not in positions[sym]:
+                            positions[sym]["last_signal_time"] = 0
             logger.info("💾 Đã khôi phục thành công trạng thái các vị thế từ tệp JSON cũ!")
         except Exception as e:
             logger.error(f"🔴 Lỗi đọc file trạng thái JSON: {e}")
@@ -546,8 +550,11 @@ def check_signals_for_symbol(sym: str):
     # TÌM KIẾM TÍN HIỆU VÀO LỆNH MỚI
     # ==========================================
     else:
-        buy_signal = (direction[idx] < 0 and direction[idx-1] > 0) and (c["close"] > ema200[idx]) and is_trending and volatility_ok
-        sell_signal = (direction[idx] > 0 and direction[idx-1] < 0) and (c["close"] < ema200[idx]) and is_trending and volatility_ok
+        # Chỉ kích hoạt tín hiệu nếu nến đóng hiện tại chưa từng phát tín hiệu
+        is_new_candle = (c["time"] != pos.get("last_signal_time", 0))
+        
+        buy_signal = (direction[idx] < 0 and direction[idx-1] > 0) and (c["close"] > ema200[idx]) and is_trending and volatility_ok and is_new_candle
+        sell_signal = (direction[idx] > 0 and direction[idx-1] < 0) and (c["close"] < ema200[idx]) and is_trending and volatility_ok and is_new_candle
         
         if buy_signal:
             pos["active_position"] = 'PENDING_LONG'
@@ -555,6 +562,7 @@ def check_signals_for_symbol(sym: str):
             pos["initial_sl"] = st[idx]
             pos["current_sl"] = pos["initial_sl"]
             pos["pending_timestamp"] = time.time()
+            pos["last_signal_time"] = c["time"]
             
             risk = pos["entry_price"] - pos["initial_sl"]
             pos["tp_part_price"] = pos["entry_price"] + risk * TP_RATIO
@@ -586,6 +594,7 @@ def check_signals_for_symbol(sym: str):
             pos["initial_sl"] = st[idx]
             pos["current_sl"] = pos["initial_sl"]
             pos["pending_timestamp"] = time.time()
+            pos["last_signal_time"] = c["time"]
             
             risk = pos["initial_sl"] - pos["entry_price"]
             pos["tp_part_price"] = pos["entry_price"] - risk * TP_RATIO
