@@ -32,11 +32,7 @@ TELEGRAM_CHAT_ID = "7312073144"         # Điền Chat ID Telegram của bạn
 
 # Danh sách các đồng coin quét song song (BTC, ETH, SOL)
 # Danh sách các đồng coin quét song song (tăng lên 12 đồng coin top)
-SYMBOLS = [
-    "BTCUSD", "ETHUSD", "SOLUSD", "BNBUSD", "XRPUSD", 
-    "ADAUSD", "DOGEUSD", "LINKUSD", "LTCUSD", "NEARUSD", 
-    "AVAXUSD", "DOTUSD"
-]
+SYMBOLS = ["XAUUSD","BTCUSD","XRPUSD","BNBUSD","LINKUSD"]
 INTERVAL = "15m"                           # Khung thời gian quét
 STATE_FILE = "positions_state.json"        # Tệp lưu trữ trạng thái vị thế JSON
 # ==========================================================
