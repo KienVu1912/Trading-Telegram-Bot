@@ -258,6 +258,8 @@ def poll_telegram_updates():
 # Helper to map common trading symbols to Yahoo Finance format
 def map_symbol_to_yahoo(sym: str) -> str:
     s = sym.upper().strip()
+    if s == "XAUUSD":
+        return "GC=F"
     if s.endswith("USDT"):
         base = s[:-4]
         return f"{base}-USD"
