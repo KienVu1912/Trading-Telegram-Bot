@@ -263,8 +263,8 @@ def map_symbol_to_yahoo(sym: str) -> str:
         return f"{base}-USD"
     if s.endswith("USD"):
         base = s[:-3]
-        # Ngoại lệ cho các cặp Forex truyền thống nếu có
-        forex_bases = ["EUR", "GBP", "AUD", "NZD", "USD"]
+        # Ngoại lệ cho các cặp Forex truyền thống và Vàng (XAU)
+        forex_bases = ["EUR", "GBP", "AUD", "NZD", "USD", "CAD", "CHF", "JPY", "XAU", "XAG"]
         if base in forex_bases and len(s) == 6:
             return f"{s}=X"
         return f"{base}-USD"
