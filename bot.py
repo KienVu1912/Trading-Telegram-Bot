@@ -30,6 +30,7 @@ logger = logging.getLogger("ultimate-v5-bot")
 TELEGRAM_BOT_TOKEN = "8872959175:AAHuNvRb629xV9kGVWIKBXOIMsEhwfKVhDY"     # Điền Telegram Bot Token của bạn
 TELEGRAM_CHAT_ID = "7312073144"         # Điền Chat ID Telegram của bạn
 
+# Danh sách các đồng coin quét song song (BTC, ETH, SOL)
 # Danh sách các đồng coin quét song song (tăng lên 12 đồng coin top)
 SYMBOLS = [
     "BTCUSD", "ETHUSD", "SOLUSD", "BNBUSD", "XRPUSD", 
@@ -640,6 +641,11 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/plain; charset=utf-8")
         self.end_headers()
         self.wfile.write(b"OK")
+        
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.end_headers()
         
     def log_message(self, format, *args):
         # Tắt log yêu cầu HTTP để giữ màn hình console sạch sẽ
