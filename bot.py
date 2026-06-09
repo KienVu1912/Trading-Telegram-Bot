@@ -491,19 +491,20 @@ def check_signals_for_symbol(sym: str):
             )
             send_telegram_message(msg)
             
-        # 2. Cập nhật Trailing Stop theo Supertrend
-        new_st_sl = st[idx]
-        if new_st_sl > pos["current_sl"]:
-            old_sl = pos["current_sl"]
-            pos["current_sl"] = new_st_sl
-            save_state()
-            msg = (
-                f"🔄 <b>[CẬP NHẬT STOP-LOSS - LONG {sym}]</b>\n\n"
-                f"🛡️ Supertrend dịch chuyển lên.\n"
-                f"👉 <b>SL mới:</b> <code>{pos['current_sl']:.2f}</code>\n"
-                f"*(Mức cũ: {old_sl:.2f})*"
-            )
-            send_telegram_message(msg)
+        # 2. Cập nhật Trailing Stop theo Supertrend (Chỉ khi vẫn giữ xu hướng tăng)
+        if direction[idx] == -1:
+            new_st_sl = st[idx]
+            if round(new_st_sl, 4) > round(pos["current_sl"], 4):
+                old_sl = pos["current_sl"]
+                pos["current_sl"] = new_st_sl
+                save_state()
+                msg = (
+                    f"🔄 <b>[CẬP NHẬT STOP-LOSS - LONG {sym}]</b>\n\n"
+                    f"🛡️ Supertrend dịch chuyển lên.\n"
+                    f"👉 <b>SL mới:</b> <code>{pos['current_sl']:.2f}</code>\n"
+                    f"*(Mức cũ: {old_sl:.2f})*"
+                )
+                send_telegram_message(msg)
             
         # 3. Quét SL
         if c_live["low"] <= pos["current_sl"]:
@@ -534,19 +535,20 @@ def check_signals_for_symbol(sym: str):
             )
             send_telegram_message(msg)
             
-        # 2. Cập nhật Trailing Stop
-        new_st_sl = st[idx]
-        if new_st_sl < pos["current_sl"]:
-            old_sl = pos["current_sl"]
-            pos["current_sl"] = new_st_sl
-            save_state()
-            msg = (
-                f"🔄 <b>[CẬP NHẬT STOP-LOSS - SHORT {sym}]</b>\n\n"
-                f"🛡️ Supertrend dịch chuyển xuống.\n"
-                f"👉 <b>SL mới:</b> <code>{pos['current_sl']:.2f}</code>\n"
-                f"*(Mức cũ: {old_sl:.2f})*"
-            )
-            send_telegram_message(msg)
+        # 2. Cập nhật Trailing Stop (Chỉ khi vẫn giữ xu hướng giảm)
+        if direction[idx] == 1:
+            new_st_sl = st[idx]
+            if round(new_st_sl, 4) < round(pos["current_sl"], 4):
+                old_sl = pos["current_sl"]
+                pos["current_sl"] = new_st_sl
+                save_state()
+                msg = (
+                    f"🔄 <b>[CẬP NHẬT STOP-LOSS - SHORT {sym}]</b>\n\n"
+                    f"🛡️ Supertrend dịch chuyển xuống.\n"
+                    f"👉 <b>SL mới:</b> <code>{pos['current_sl']:.2f}</code>\n"
+                    f"*(Mức cũ: {old_sl:.2f})*"
+                )
+                send_telegram_message(msg)
             
         # 3. Quét SL
         if c_live["high"] >= pos["current_sl"]:
